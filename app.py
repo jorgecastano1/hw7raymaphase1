@@ -20,7 +20,6 @@ import pygame
 # =============================
 TILE_SIZE = 32
 FPS = 60
-PACMAN_MOVE_DELAY_MS = 140
 GHOST_MOVE_DELAY_MS = 180
 
 # Colors (kept centralized for readability)
@@ -65,6 +64,20 @@ DIRECTIONS = {
     "DOWN": (0, 1),
 }
 
+# Seven-segment mapping for font-free numeric display
+DIGIT_SEGMENTS = {
+    "0": (1, 1, 1, 0, 1, 1, 1),
+    "1": (0, 0, 1, 0, 0, 1, 0),
+    "2": (1, 0, 1, 1, 1, 0, 1),
+    "3": (1, 0, 1, 1, 0, 1, 1),
+    "4": (0, 1, 1, 1, 0, 1, 0),
+    "5": (1, 1, 0, 1, 0, 1, 1),
+    "6": (1, 1, 0, 1, 1, 1, 1),
+    "7": (1, 0, 1, 0, 0, 1, 0),
+    "8": (1, 1, 1, 1, 1, 1, 1),
+    "9": (1, 1, 1, 1, 0, 1, 1),
+}
+
 
 @dataclass
 class GameState:
@@ -80,10 +93,10 @@ class GameState:
     pacman_pos: tuple[int, int] = (1, 1)
     ghost_pos: tuple[int, int] = (1, 1)
 
-    pacman_dir: tuple[int, int] = (0, 0)
+    # Key phase-1 behavior: one key press -> one tile move
+    pending_move: tuple[int, int] | None = None
     ghost_dir: tuple[int, int] = (0, 0)
 
-    last_pacman_move_ms: int = 0
     last_ghost_move_ms: int = 0
 
 
@@ -134,27 +147,26 @@ def handle_input(state: GameState) -> None:
             state.running = False
         elif event.type == pygame.KEYDOWN and not state.game_over:
             if event.key in (pygame.K_LEFT, pygame.K_a):
-                state.pacman_dir = DIRECTIONS["LEFT"]
+                state.pending_move = DIRECTIONS["LEFT"]
             elif event.key in (pygame.K_RIGHT, pygame.K_d):
-                state.pacman_dir = DIRECTIONS["RIGHT"]
+                state.pending_move = DIRECTIONS["RIGHT"]
             elif event.key in (pygame.K_UP, pygame.K_w):
-                state.pacman_dir = DIRECTIONS["UP"]
+                state.pending_move = DIRECTIONS["UP"]
             elif event.key in (pygame.K_DOWN, pygame.K_s):
-                state.pacman_dir = DIRECTIONS["DOWN"]
+                state.pending_move = DIRECTIONS["DOWN"]
             elif event.key == pygame.K_r and state.game_over:
                 # TODO (Phase 2): support full reset without restarting process
                 pass
 
 
-def update_pacman(grid: list[list[str]], state: GameState, now_ms: int) -> None:
-    """Move Pac-Man on a fixed time step and eat pellets."""
-    if now_ms - state.last_pacman_move_ms < PACMAN_MOVE_DELAY_MS:
-        return
-
-    state.last_pacman_move_ms = now_ms
-
-    if state.pacman_dir != (0, 0):
-        state.pacman_pos = try_move(state.pacman_pos, state.pacman_dir, grid)
+def update_pacman(grid: list[list[str]], state: GameState) -> None:
+    """
+    Move Pac-Man exactly one tile per key press.
+    This makes control behavior explicit and easy to test.
+    """
+    if state.pending_move is not None:
+        state.pacman_pos = try_move(state.pacman_pos, state.pending_move, grid)
+        state.pending_move = None
 
     x, y = state.pacman_pos
     if grid[y][x] == ".":
@@ -226,6 +238,36 @@ def draw_ghost(surface: pygame.Surface, tile_pos: tuple[int, int]) -> None:
     pygame.draw.rect(surface, GHOST_COLOR, rect, border_radius=8)
 
 
+def draw_digit(surface: pygame.Surface, digit: str, x: int, y: int, color: tuple[int, int, int]) -> None:
+    """Draw one 7-segment digit (font-free)."""
+    segments = DIGIT_SEGMENTS.get(digit, DIGIT_SEGMENTS["0"])
+    w, h, t = 14, 24, 3
+
+    # A, B, C, D, E, F, G segments
+    rects = [
+        pygame.Rect(x + t, y, w, t),                 # A
+        pygame.Rect(x, y + t, t, h // 2 - t),        # F
+        pygame.Rect(x + w + t, y + t, t, h // 2 - t),# B
+        pygame.Rect(x + t, y + h // 2, w, t),        # G
+        pygame.Rect(x, y + h // 2 + t, t, h // 2 - t),
+        pygame.Rect(x + w + t, y + h // 2 + t, t, h // 2 - t),
+        pygame.Rect(x + t, y + h - t, w, t),         # D
+    ]
+
+    for on, rect in zip(segments, rects):
+        if on:
+            pygame.draw.rect(surface, color, rect, border_radius=2)
+
+
+def draw_number(surface: pygame.Surface, value: int, x: int, y: int, color: tuple[int, int, int]) -> None:
+    """Draw an integer using multiple 7-segment digits."""
+    digits = str(max(0, value))
+    cursor_x = x
+    for ch in digits:
+        draw_digit(surface, ch, cursor_x, y, color)
+        cursor_x += 20
+
+
 def draw_hud(surface: pygame.Surface, state: GameState, hud_height: int, map_width: int) -> None:
     """
     Font-free HUD.
@@ -254,6 +296,16 @@ def draw_hud(surface: pygame.Surface, state: GameState, hud_height: int, map_wid
         indicator_color = (120, 190, 255)
     pygame.draw.circle(surface, indicator_color, (map_width - 18, hud_height // 2), 8)
 
+    # Numeric score display (font-free)
+    # Yellow icon + score near left-middle
+    pygame.draw.circle(surface, PACMAN_COLOR, (300, 20), 6)
+    draw_number(surface, state.score, 314, 8, TEXT_COLOR)
+
+    # Pellet count on the right
+    pellets_left = max(0, state.total_pellets - state.pellets_eaten)
+    pygame.draw.circle(surface, PELLET_COLOR, (440, 20), 4)
+    draw_number(surface, pellets_left, 452, 8, TEXT_COLOR)
+
 
 def main() -> None:
     pygame.init()
@@ -274,7 +326,7 @@ def main() -> None:
         handle_input(state)
 
         if not state.game_over:
-            update_pacman(grid, state, now_ms)
+            update_pacman(grid, state)
             update_ghost(grid, state, now_ms)
             check_end_conditions(state)
 
