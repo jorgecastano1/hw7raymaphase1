@@ -9,8 +9,10 @@ Create a strong starting point (not a finished game) that another student can un
 - Opens a `pygame` window with a tile-based maze.
 - Draws walls, pellets, Pac-Man, and one ghost.
 - Supports Pac-Man movement with arrow keys or WASD.
+- Uses **one key press = one tile move** control (step-based movement).
 - Lets Pac-Man eat pellets (`+10` score per pellet).
 - Includes basic ghost movement (simple random valid direction logic).
+- Shows score and pellets-left with a **font-free HUD** (works even when `pygame.font` is unavailable).
 - Detects game over conditions:
 	- lose when ghost collides with Pac-Man,
 	- win when all pellets are eaten.
@@ -43,6 +45,22 @@ python app.py
 Controls:
 - Arrow keys / WASD to move
 - Close window to quit
+
+---
+
+## Quick test checklist
+1. Game window opens without crash.
+2. Press one arrow key once → Pac-Man moves exactly one tile.
+3. Eat a pellet → score increases by `10`.
+4. Collide with ghost → game over state appears.
+5. Eat all pellets → win state appears.
+
+---
+
+## Known environment note (macOS + Python 3.14)
+Some pygame builds do not include `pygame.font`.
+This project intentionally avoids font dependencies and uses shape-based HUD rendering.
+So if font modules are missing, the game still runs normally.
 
 ---
 

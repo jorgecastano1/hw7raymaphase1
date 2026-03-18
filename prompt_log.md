@@ -25,8 +25,10 @@ March 18, 2026
 - Pygame window/game loop.
 - Tile map parsing (`#`, `.`, `P`, `G`).
 - Pac-Man movement and pellet collection.
+- Step 2 update: one key press moves Pac-Man exactly one tile.
 - One ghost with simple movement logic.
 - Score + pellets-left HUD.
+- Runtime fix: removed dependency on `pygame.font` and switched to font-free HUD rendering.
 - Win/lose detection.
 - README updated with setup/run/completed/remaining details.
 
