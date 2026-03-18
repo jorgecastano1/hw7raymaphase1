@@ -1,55 +1,74 @@
-# HW7 — Phase 1 Starter (Clear Handoff Version)
+# HW7 — Phase 1 Pac-Man Starter (pygame)
 
-This project is a **Phase 1 starter** for HW7.
+This repository contains a **Phase 1 handoff** for HW7: a readable, runnable Pac-Man starter built with `pygame`.
 
-## Goal of this phase
-Build a clean starting point (not a finished game) so another student can continue it easily.
+## Phase 1 objective
+Create a strong starting point (not a finished game) that another student can understand and continue quickly.
 
-## What I followed from the class slide
-1. Start coding with AI help, but keep code readable.
-2. Document as you build.
-3. Include a clear README: what it is, how to run, what is done, what remains.
-4. Commit and push after the in-class phase even if incomplete.
-5. Leave clean, understandable code for the next person.
-
----
+## What this starter currently does
+- Opens a `pygame` window with a tile-based maze.
+- Draws walls, pellets, Pac-Man, and one ghost.
+- Supports Pac-Man movement with arrow keys or WASD.
+- Lets Pac-Man eat pellets (`+10` score per pellet).
+- Includes basic ghost movement (simple random valid direction logic).
+- Detects game over conditions:
+	- lose when ghost collides with Pac-Man,
+	- win when all pellets are eaten.
 
 ## Project structure
-- `app.py` — starter game loop + clearly marked TODO sections.
-- `prompt_log.md` — development and AI prompt notes.
-- `.gitignore` — ignores Python cache/system files.
+- `app.py` — main game file with clear section headers and TODO notes.
+- `prompt_log.md` — AI-assisted development record.
+- `.gitignore` — excludes cache and virtual environment artifacts.
 
 ---
 
-## How to run
-From this folder:
+## Setup and run
 
+### 1) Create and activate virtual environment
 ```bash
-python3 app.py
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
+### 2) Install dependencies
+```bash
+python -m pip install pygame
+```
+
+### 3) Run
+```bash
+python app.py
+```
+
+Controls:
+- Arrow keys / WASD to move
+- Close window to quit
+
 ---
 
-## What is completed (Phase 1)
-- Basic CLI structure for a small text game.
-- `GameState` object to hold score, turn count, and game status.
-- Main game loop with command handling.
-- Placeholder commands (`status`, `play`, `help`, `quit`) implemented simply.
-- Clear comments for handoff.
+## Design decisions (clarity-first)
+1. **Single-file layout for Phase 1**: easier handoff for early-stage project.
+2. **Sectioned code**: configuration, level data, state, update loop, rendering.
+3. **`GameState` dataclass**: centralizes mutable state.
+4. **Tile-based movement**: simpler than pixel physics for readability.
+5. **Explicit TODOs**: makes Phase 2 extension points obvious.
 
 ---
 
-## What remains (for Phase 2)
-- Replace placeholder `play` logic with real game mechanics.
-- Add win/lose conditions tied to actual rules.
-- Add richer content (levels/events/items).
-- Improve input validation and user feedback.
-- Add tests if required by the assignment.
+## What remains for Phase 2
+- Add smoother Pac-Man animation (mouth open/close, directional facing).
+- Implement smarter ghost AI (chase/scatter/frightened modes).
+- Add multiple levels and better map loading.
+- Add start screen / restart flow / lives system.
+- Separate into modules (`entities.py`, `level.py`, `render.py`) if project grows.
+- Add basic tests for helper functions (`is_wall`, movement rules).
 
 ---
 
 ## Handoff notes for the next student
-- Start in `app.py` at `handle_play_action()`.
-- Expand that function first, then update `print_help()`.
-- Keep changes small and commit frequently.
-- Preserve readability over cleverness.
+Start with these functions in `app.py`:
+1. `update_ghost()` — easiest place to improve gameplay quickly.
+2. `draw_pacman()` — add direction-aware and animated sprite behavior.
+3. `check_end_conditions()` — extend with lives and restart logic.
+
+Prioritize readability over cleverness and commit in small increments.

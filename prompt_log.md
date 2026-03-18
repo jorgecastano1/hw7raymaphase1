@@ -7,19 +7,31 @@ March 18, 2026
 - GitHub Copilot (GPT-5.3-Codex)
 
 ## Session notes
-1. Created HW7 folder under `/Users/ruizema/clawd/hw7` (not under `SQLite`).
-2. Synced project with `https://github.com/raymaruize/hw7.git`.
-3. Updated project files to match Phase 1 guideline style:
-   - prioritize readability,
-   - document what is done vs what remains,
-   - keep code handoff-friendly.
-4. Built a clean CLI starter with explicit TODO sections.
+1. Created HW7 under `/Users/ruizema/clawd/hw7` (correct location).
+2. Synced repository with `https://github.com/raymaruize/hw7.git`.
+3. Reviewed Phase 1 guideline priorities:
+   - clarity over cleverness,
+   - document while building,
+   - ship a clean starter, not a finished game.
+4. Switched project from CLI placeholder to `pygame` Pac-Man starter.
+5. Implemented a readable tile-map loop with comments and TODO points for handoff.
 
 ## Key prompts used (summary)
 - "Create HW7 directly under clawd, not SQLite."
 - "Read the phase guideline image and make the project very clear and explicit."
+- "Use pygame and start a Pac-Man game that someone else can continue easily."
 
-## Next prompts to add later
-- Prompt for implementing real game mechanics.
-- Prompt for testing/debugging pass.
-- Prompt for final polish before submission.
+## What was implemented in this phase
+- Pygame window/game loop.
+- Tile map parsing (`#`, `.`, `P`, `G`).
+- Pac-Man movement and pellet collection.
+- One ghost with simple movement logic.
+- Score + pellets-left HUD.
+- Win/lose detection.
+- README updated with setup/run/completed/remaining details.
+
+## TODO handoff markers for next phase
+- Improve ghost behavior (chase/scatter).
+- Add animation and polish.
+- Add restart/lives flow.
+- Consider splitting code into modules once mechanics stabilize.
