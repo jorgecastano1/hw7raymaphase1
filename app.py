@@ -226,23 +226,33 @@ def draw_ghost(surface: pygame.Surface, tile_pos: tuple[int, int]) -> None:
     pygame.draw.rect(surface, GHOST_COLOR, rect, border_radius=8)
 
 
-def draw_hud(surface: pygame.Surface, state: GameState, font: pygame.font.Font) -> None:
-    score_text = font.render(f"Score: {state.score}", True, TEXT_COLOR)
-    pellets_left = state.total_pellets - state.pellets_eaten
-    pellets_text = font.render(f"Pellets Left: {pellets_left}", True, TEXT_COLOR)
+def draw_hud(surface: pygame.Surface, state: GameState, hud_height: int, map_width: int) -> None:
+    """
+    Font-free HUD.
+    Some Python/pygame builds do not include pygame.font, so this HUD uses shapes only.
+    Detailed values are shown in the window title via pygame.display.set_caption.
+    """
+    # HUD background strip
+    pygame.draw.rect(surface, (20, 20, 32), pygame.Rect(0, 0, map_width, hud_height))
 
-    surface.blit(score_text, (12, 8))
-    surface.blit(pellets_text, (180, 8))
+    # Score progress bar based on pellets eaten ratio
+    ratio = 0.0
+    if state.total_pellets > 0:
+        ratio = state.pellets_eaten / state.total_pellets
 
-    if state.game_over:
-        if state.win:
-            message = "YOU WIN!"
-            color = (120, 255, 120)
-        else:
-            message = "GAME OVER"
-            color = (255, 120, 120)
-        end_text = font.render(message, True, color)
-        surface.blit(end_text, (420, 8))
+    bar_x, bar_y = 12, 12
+    bar_w, bar_h = 260, 16
+    pygame.draw.rect(surface, (60, 60, 80), pygame.Rect(bar_x, bar_y, bar_w, bar_h), border_radius=6)
+    pygame.draw.rect(surface, PACMAN_COLOR, pygame.Rect(bar_x, bar_y, int(bar_w * ratio), bar_h), border_radius=6)
+
+    # Status indicator on the right
+    if state.game_over and state.win:
+        indicator_color = (120, 255, 120)
+    elif state.game_over and not state.win:
+        indicator_color = (255, 120, 120)
+    else:
+        indicator_color = (120, 190, 255)
+    pygame.draw.circle(surface, indicator_color, (map_width - 18, hud_height // 2), 8)
 
 
 def main() -> None:
@@ -256,7 +266,6 @@ def main() -> None:
     screen = pygame.display.set_mode((map_width, map_height + hud_height))
     pygame.display.set_caption("HW7 Phase 1 - Pac-Man Starter")
 
-    font = pygame.font.SysFont("Arial", 22)
     clock = pygame.time.Clock()
 
     while state.running:
@@ -269,6 +278,16 @@ def main() -> None:
             update_ghost(grid, state, now_ms)
             check_end_conditions(state)
 
+        pellets_left = state.total_pellets - state.pellets_eaten
+        status = "RUNNING"
+        if state.game_over and state.win:
+            status = "YOU WIN"
+        elif state.game_over and not state.win:
+            status = "GAME OVER"
+        pygame.display.set_caption(
+            f"HW7 Phase 1 - Pac-Man Starter | Score: {state.score} | Pellets Left: {pellets_left} | {status}"
+        )
+
         screen.fill(BG_COLOR)
 
         # Draw gameplay area on a translated surface
@@ -278,7 +297,7 @@ def main() -> None:
         draw_pacman(game_surface, state.pacman_pos)
         draw_ghost(game_surface, state.ghost_pos)
 
-        draw_hud(screen, state, font)
+        draw_hud(screen, state, hud_height, map_width)
 
         pygame.display.flip()
         clock.tick(FPS)
