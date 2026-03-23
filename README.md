@@ -90,3 +90,15 @@ Start with these functions in `app.py`:
 3. `check_end_conditions()` — extend with lives and restart logic.
 
 Prioritize readability over cleverness and commit in small increments.
+
+---
+
+## Changes made since Phase 1
+
+- **Movement** — Pac-Man moves **continuously** on a timer (not one tile per key); **starts facing left**; **turns only** if the next tile in that direction is open (can’t turn into a wall to stop).
+- **Lives & restart** — **3 lives**, lose one on ghost hit with **respawn**; **R** restarts after win/lose; **start screen** (any key to begin).
+- **Ghost** — **Chases** Pac-Man (with some randomness); **avoids 180° reversals** when possible to reduce getting stuck / bouncing.
+- **Graphics** — Pac-Man **mouth + facing**; walls drawn as **connected outlines** instead of solid full tiles.
+- **HUD & text** — **Fonts** when `pygame.font` works; **new HUD** (three columns, dividers); **win / game over overlay**; caption shows more status.
+- **Level** — **New maze** (more loops, fewer dead ends).
+- **Bugs / robustness** — **`is_wall` / `_is_wall`** use **per-row width** so ragged rows don’t crash wall drawing.
