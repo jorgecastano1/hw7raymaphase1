@@ -177,9 +177,12 @@ def load_level() -> tuple[list[list[str]], GameState]:
 
 def is_wall(grid: list[list[str]], x: int, y: int) -> bool:
     """Return True if target tile is outside map or a wall."""
-    if y < 0 or y >= len(grid) or x < 0 or x >= len(grid[0]):
+    if y < 0 or y >= len(grid):
         return True
-    return grid[y][x] == "#"
+    row = grid[y]
+    if x < 0 or x >= len(row):
+        return True
+    return row[x] == "#"
 
 
 def try_move(pos: tuple[int, int], direction: tuple[int, int], grid: list[list[str]]) -> tuple[int, int]:
@@ -335,10 +338,13 @@ def check_end_conditions(grid: list[list[str]], state: GameState) -> None:
 WALL_THICKNESS = 6  # thickness of wall boundary lines (connected outline)
 
 def _is_wall(grid: list[list[str]], x: int, y: int) -> bool:
-    """True if (x,y) is inside grid and is a wall."""
-    if y < 0 or y >= len(grid) or x < 0 or x >= len(grid[0]):
+    """True if (x,y) is outside the grid or is a wall."""
+    if y < 0 or y >= len(grid):
         return True
-    return grid[y][x] == "#"
+    row = grid[y]
+    if x < 0 or x >= len(row):
+        return True
+    return row[x] == "#"
 
 
 def draw_grid(surface: pygame.Surface, grid: list[list[str]]) -> None:
